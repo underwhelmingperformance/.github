@@ -1,0 +1,89 @@
+{
+  $schema: "https://docs.renovatebot.com/renovate-schema.json",
+  branchPrefix: "renovate/",
+  extends: [
+    "config:best-practices",
+    "group:allNonMajor",
+    "group:monorepos",
+    "group:recommended",
+    "group:linters",
+    ":automergeMinor",
+    ":enableVulnerabilityAlertsWithLabel(automerge-security-update)",
+    ":maintainLockFilesWeekly",
+  ],
+  customManagers: [
+    {
+      customType: "regex",
+      fileMatch: [
+        "(^|/)(workflow-templates|\\.(?:github|gitea|forgejo)/(?:workflows|actions))/.+\\.ya?ml$",
+        "(^|/)action\\.ya?ml$",
+      ],
+      matchStrings: [
+        "# renovate: datasource=(?<datasource>[a-z-.]+?) depName=(?<depName>[^\\s]+?)(?: (?:lookupName|packageName)=(?<packageName>[^\\s]+?))?(?: versioning=(?<versioning>[^\\s]+?))?(?: extractVersion=(?<extractVersion>[^\\s]+?))?\\s+[A-Za-z0-9_-]+?[_-](?:VERSION|version)\\s*:\\s*[\"']?(?<currentValue>[^\\s\"'@]+)(?:@(?<currentDigest>sha256:[a-f0-9]+))?[\"']?",
+      ],
+    },
+  ],
+  dependencyDashboard: true,
+  lockFileMaintenance: {
+    enabled: true,
+    automerge: true,
+  },
+  nix: {
+    enabled: true,
+  },
+  osvVulnerabilityAlerts: true,
+  packageRules: [
+    {
+      groupName: "wasm-bindgen and cloudflare-workers",
+      matchSourceUrls: ["https://github.com/wasm-bindgen/wasm-bindgen"],
+      matchManagers: ["cargo", "custom.regex"],
+    },
+    {
+      groupName: "wasm-bindgen and cloudflare-workers",
+      matchPackageNames: ["worker", "worker-macros"],
+      matchManagers: ["cargo"],
+    },
+    {
+      groupName: "tracing",
+      matchPackageNames: ["tracing*", "opentelemetry*"],
+      matchManagers: ["cargo"],
+    },
+    {
+      // `uuid` uses `getrandom` internally, and the two crates need compatible
+      // major versions for WASM support.
+      groupName: "uuid and getrandom",
+      matchPackageNames: ["uuid", "getrandom"],
+      matchManagers: ["cargo"],
+    },
+    {
+      labels: ["update-major"],
+      matchUpdateTypes: ["major"],
+    },
+    {
+      labels: ["automerge", "update-minor"],
+      matchUpdateTypes: ["minor"],
+      automerge: true,
+    },
+    {
+      labels: ["automerge", "update-patch"],
+      matchUpdateTypes: ["patch"],
+      automerge: true,
+    },
+    {
+      labels: ["update-digest"],
+      matchUpdateTypes: ["digest"],
+      automerge: true,
+    },
+    {
+      // Keep Renovate's own image updates away from weekday working hours.
+      schedule: "* 0-4 * * 1",
+      matchPackageNames: ["ghcr.io/renovatebot/renovate"],
+    },
+  ],
+  platformCommit: "enabled",
+  rebaseWhen: "behind-base-branch",
+  vulnerabilityAlerts: {
+    enabled: true,
+    labels: ["automerge-security-update"],
+  },
+}

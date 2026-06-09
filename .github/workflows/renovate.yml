@@ -1,0 +1,86 @@
+name: Renovate
+
+on:
+  schedule:
+    # Offset by 12 minutes to avoid busy times on the hour.
+    - cron: 12 */4 * * *
+
+  pull_request:
+    paths:
+      - renovate-config.json
+      - renovate-config.json5
+      - .github/workflows/renovate.yml
+
+  push:
+    branches:
+      - main
+    paths:
+      - renovate-config.json
+      - renovate-config.json5
+      - .github/workflows/renovate.yml
+
+  workflow_dispatch:
+    inputs:
+      dry-run:
+        description: "Run Renovate in dry-run mode"
+        required: false
+        default: false
+        type: boolean
+
+      debug:
+        description: "Run Renovate in debug mode"
+        required: false
+        default: false
+        type: boolean
+
+permissions: {}
+
+concurrency:
+  group: renovate
+  cancel-in-progress: false
+
+jobs:
+  renovate:
+    permissions:
+      contents: read
+
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+          sparse-checkout: |
+            renovate-config.json
+            renovate-config.json5
+
+      - name: Generate token
+        id: generate-token
+        uses: actions/create-github-app-token@1b10c78c7865c340bc4f6099eb2f838309f1e8c3 # v3.1.1
+        with:
+          app-id: ${{ secrets.MOVEROFTHINGS_APP_ID }}
+          private-key: ${{ secrets.MOVEROFTHINGS_PRIVATE_KEY }}
+          owner: ${{ github.repository_owner }}
+
+      - name: Self-hosted Renovate
+        uses: renovatebot/github-action@79dc0ba74dc3de28db0a7aeb1d0b95d5bf5fde2a # v46.1.13
+        with:
+          configurationFile: renovate-config.json5
+          # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
+          renovate-version: 43.170.18@sha256:976d49d41e750ad97e634e50b3c6cfafebce0176778bf80af9e092d228e744a8
+          token: ${{ steps.generate-token.outputs.token }}
+        env:
+          LOG_LEVEL:
+            ${{ ((github.event_name == 'workflow_dispatch' && inputs.debug) ||
+            (github.event_name == 'pull_request')) && 'debug' || 'info' }}
+          RENOVATE_AUTODISCOVER: "true"
+          RENOVATE_AUTODISCOVER_FILTER: "underwhelmingperformance/*"
+          RENOVATE_DRY_RUN:
+            ${{ (github.event_name == 'pull_request' || (github.event_name ==
+            'workflow_dispatch' && github.event.inputs.dry-run == 'true')) &&
+            'full' || null }}
+          RENOVATE_ONBOARDING: "false"
+          RENOVATE_PLATFORM: github
+          RENOVATE_REQUIRE_CONFIG: optional
