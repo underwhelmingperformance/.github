@@ -88,10 +88,13 @@ jobs:
           RENOVATE_ALLOWED_COMMANDS: '["^pnpm [A-Za-z0-9:._-]+$"]'
           RENOVATE_AUTODISCOVER: "true"
           RENOVATE_AUTODISCOVER_FILTER: "underwhelmingperformance/*"
-          # Nix builds run inside the Renovate container, which cannot create
-          # the namespaces the Linux sandbox needs. Fixed-output derivations
-          # are still verified by their recorded hash.
-          RENOVATE_CUSTOM_ENV_VARIABLES: '{"NIX_CONFIG": "sandbox = false"}'
+          # Nix builds run inside the Renovate container: the stock nix.conf
+          # there leaves flakes disabled, and the container cannot create the
+          # namespaces the Linux sandbox needs. Fixed-output derivations are
+          # still verified by their recorded hash.
+          RENOVATE_CUSTOM_ENV_VARIABLES:
+            '{"NIX_CONFIG": "experimental-features = nix-command
+            flakes\nsandbox = false"}'
           RENOVATE_DRY_RUN:
             ${{ (github.event_name == 'pull_request' || (github.event_name ==
             'workflow_dispatch' && github.event.inputs.dry-run == 'true')) &&
