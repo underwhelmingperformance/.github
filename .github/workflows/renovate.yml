@@ -56,6 +56,7 @@ jobs:
           sparse-checkout: |
             renovate-config.json
             renovate-config.json5
+            .github/renovate-entrypoint.sh
 
       - name: Generate token
         id: generate-token
@@ -78,6 +79,12 @@ jobs:
           # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
           renovate-version: 43.216.4@sha256:5cc822c3beaa73d05e8940754e4e7adc9cd1e199cf61d71e2f86d75c84f9c779
           token: ${{ steps.generate-token.outputs.token }}
+          # Install a real Nix into the container before Renovate starts, so
+          # post-upgrade tasks that build a flake substitute from cache.nixos.org
+          # instead of compiling the toolchain from source. Root is needed to
+          # install the package and write /etc/nix.
+          docker-cmd-file: .github/renovate-entrypoint.sh
+          docker-user: root
         env:
           LOG_LEVEL:
             ${{ ((github.event_name == 'workflow_dispatch' && inputs.debug) ||
@@ -88,13 +95,6 @@ jobs:
           RENOVATE_ALLOWED_COMMANDS: '["^pnpm [A-Za-z0-9:._-]+$"]'
           RENOVATE_AUTODISCOVER: "true"
           RENOVATE_AUTODISCOVER_FILTER: "underwhelmingperformance/*"
-          # Nix builds run inside the Renovate container: the stock nix.conf
-          # there leaves flakes disabled, and the container cannot create the
-          # namespaces the Linux sandbox needs. Fixed-output derivations are
-          # still verified by their recorded hash.
-          RENOVATE_CUSTOM_ENV_VARIABLES:
-            '{"NIX_CONFIG": "experimental-features = nix-command
-            flakes\nsandbox = false"}'
           RENOVATE_DRY_RUN:
             ${{ (github.event_name == 'pull_request' || (github.event_name ==
             'workflow_dispatch' && github.event.inputs.dry-run == 'true')) &&
