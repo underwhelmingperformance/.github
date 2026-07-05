@@ -82,8 +82,16 @@ jobs:
           LOG_LEVEL:
             ${{ ((github.event_name == 'workflow_dispatch' && inputs.debug) ||
             (github.event_name == 'pull_request')) && 'debug' || 'info' }}
+          # Repositories opt in to `postUpgradeTasks` in their own Renovate
+          # config; only commands matching this list may run. Any bare pnpm
+          # script is allowed, with no arguments or shell metacharacters.
+          RENOVATE_ALLOWED_COMMANDS: '["^pnpm [A-Za-z0-9:._-]+$"]'
           RENOVATE_AUTODISCOVER: "true"
           RENOVATE_AUTODISCOVER_FILTER: "underwhelmingperformance/*"
+          # Nix builds run inside the Renovate container, which cannot create
+          # the namespaces the Linux sandbox needs. Fixed-output derivations
+          # are still verified by their recorded hash.
+          RENOVATE_CUSTOM_ENV_VARIABLES: '{"NIX_CONFIG": "sandbox = false"}'
           RENOVATE_DRY_RUN:
             ${{ (github.event_name == 'pull_request' || (github.event_name ==
             'workflow_dispatch' && github.event.inputs.dry-run == 'true')) &&
