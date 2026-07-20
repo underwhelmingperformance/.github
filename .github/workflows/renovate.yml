@@ -50,7 +50,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
           sparse-checkout: |
@@ -77,7 +77,7 @@ jobs:
         with:
           configurationFile: renovate-config.json5
           # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
-          renovate-version: 43.272.0@sha256:41cdfccf7c54c8a4ad675a93874b10d47f5da0a651680cd2502d3dddd70f10a7
+          renovate-version: 43.272.4@sha256:6aaa848f2e0660525a1a10bd6b24b8e5de806666915015eed1556a2b8eb283fc
           token: ${{ steps.generate-token.outputs.token }}
           # Install a real Nix into the container before Renovate starts, so
           # post-upgrade tasks that build a flake substitute from cache.nixos.org
