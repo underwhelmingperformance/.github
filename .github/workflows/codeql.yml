@@ -21,7 +21,7 @@ jobs:
       contents: read
       security-events: write # CodeQL uploads SARIF results to GitHub code scanning.
 
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     strategy:
       fail-fast: false
       matrix:
