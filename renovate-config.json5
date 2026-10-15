@@ -27,6 +27,10 @@
   lockFileMaintenance: {
     enabled: true,
     automerge: true,
+    // Replaces the "before 4am on Monday" window from :maintainLockFilesWeekly.
+    // GitHub starts scheduled runs hours late and often skips the overnight
+    // ones, so a window of a few hours can go weeks without a Renovate run.
+    schedule: ["* * * * 1"],
   },
   nix: {
     enabled: true,
@@ -75,8 +79,9 @@
       automerge: true,
     },
     {
-      // Keep Renovate's own image updates away from weekday working hours.
-      schedule: "* 0-4 * * 1",
+      // Update Renovate's own image once a week. The window covers all of
+      // Monday for the same reason as lockFileMaintenance.
+      schedule: "* * * * 1",
       matchPackageNames: ["ghcr.io/renovatebot/renovate"],
     },
   ],
