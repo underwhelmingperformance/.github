@@ -73,11 +73,11 @@ jobs:
           permission-workflows: write
 
       - name: Self-hosted Renovate
-        uses: renovatebot/github-action@a63d9a7bc606f7336fd20b47f2f32259a35e6213 # v46.3.9
+        uses: renovatebot/github-action@2804199d260ad00c1fae0e9e842888369391c776 # v46.3.10
         with:
           configurationFile: renovate-config.json5
           # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
-          renovate-version: 44.171.1@sha256:6fffb26e606488bf674f2d9400fc3fc6b2a0243a0c22a4a4d22e422ee44934c5
+          renovate-version: 44.192.2@sha256:37960a62ba1faa9079a7c4eead9b3f4470748a64ecd207e06c09fd8858673e17
           token: ${{ steps.generate-token.outputs.token }}
           # Install a real Nix into the container before Renovate starts, so
           # post-upgrade tasks that build a flake substitute from cache.nixos.org
