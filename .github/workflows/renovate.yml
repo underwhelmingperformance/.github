@@ -41,9 +41,18 @@ concurrency:
 
 jobs:
   renovate:
-    name: renovate
+    name: renovate (${{ matrix.owner }})
     permissions:
       contents: read
+
+    # An installation token covers one account, so each account that has
+    # installed the app gets its own Renovate run.
+    strategy:
+      fail-fast: false
+      matrix:
+        owner:
+          - underwhelmingperformance
+          - iainlane
 
     runs-on: ubuntu-latest
     timeout-minutes: 45
@@ -64,7 +73,7 @@ jobs:
         with:
           app-id: ${{ secrets.MOVEROFTHINGS_APP_ID }}
           private-key: ${{ secrets.MOVEROFTHINGS_PRIVATE_KEY }}
-          owner: ${{ github.repository_owner }} # zizmor: ignore[github-app] Org-wide Renovate autodiscovery needs every repository available to the app installation.
+          owner: ${{ matrix.owner }} # zizmor: ignore[github-app] Renovate autodiscovery needs every repository available to the account's app installation.
           permission-contents: write
           permission-issues: write
           permission-pull-requests: write
@@ -91,10 +100,11 @@ jobs:
             (github.event_name == 'pull_request')) && 'debug' || 'info' }}
           # Repositories opt in to `postUpgradeTasks` in their own Renovate
           # config; only commands matching this list may run. Any bare pnpm
-          # script is allowed, with no arguments or shell metacharacters.
-          RENOVATE_ALLOWED_COMMANDS: '["^pnpm [A-Za-z0-9:._-]+$"]'
+          # script is allowed, with no arguments or shell metacharacters, and
+          # so is the repository's own .github/renovate-post-upgrade.bash.
+          RENOVATE_ALLOWED_COMMANDS: '["^pnpm [A-Za-z0-9:._-]+$", "^bash \\.github/renovate-post-upgrade\\.bash$"]'
           RENOVATE_AUTODISCOVER: "true"
-          RENOVATE_AUTODISCOVER_FILTER: "underwhelmingperformance/*"
+          RENOVATE_AUTODISCOVER_FILTER: ${{ matrix.owner }}/*
           RENOVATE_DRY_RUN:
             ${{ (github.event_name == 'pull_request' || (github.event_name ==
             'workflow_dispatch' && github.event.inputs.dry-run == 'true')) &&
