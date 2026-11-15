@@ -55,7 +55,9 @@ jobs:
           - iainlane
 
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    # The installation token expires after an hour and Renovate cannot
+    # renew it, so a longer run would fail once the token expires.
+    timeout-minutes: 55
 
     steps:
       - name: Checkout Code

@@ -24,6 +24,9 @@
     },
   ],
   dependencyDashboard: true,
+  // A repository's post-upgrade command can relock and rebuild several
+  // packages, which takes longer than Renovate's 15-minute default.
+  executionTimeout: 30,
   lockFileMaintenance: {
     enabled: true,
     automerge: true,
