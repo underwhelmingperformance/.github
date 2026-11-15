@@ -94,8 +94,9 @@ jobs:
           token: ${{ steps.generate-token.outputs.token }}
           # Install a real Nix into the container before Renovate starts, so
           # post-upgrade tasks that build a flake substitute from cache.nixos.org
-          # instead of compiling the toolchain from source. Root is needed to
-          # install the package and write /etc/nix.
+          # instead of compiling the toolchain from source. The script starts
+          # as root to install the package and write /etc/nix, then runs
+          # Renovate as the image's unprivileged user.
           docker-cmd-file: .github/renovate-entrypoint.sh
           docker-user: root
         env:
