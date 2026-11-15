@@ -19,15 +19,24 @@ cat >/etc/nix/nix.conf <<'EOF'
 experimental-features = nix-command flakes
 substituters = https://cache.nixos.org
 
-# Build as the calling user: this ephemeral container has no nixbld group.
-build-users-group =
-
 # The container cannot create the namespaces the build sandbox needs.
 sandbox = false
 
 max-jobs = auto
 EOF
 
-nix --version
+# Nix uses /nix/store only when /nix/var/nix exists and is writable. Without
+# that directory, Nix gives a user other than root a store under
+# ~/.local/share/nix/root instead.
+mkdir -p /nix/var/nix
+chown -R ubuntu:root /nix
 
-exec renovate
+# The image's user has root (gid 0) as its primary group, and Docker gives it
+# the same groups when the image starts without a `--user` override.
+as_renovate_user=(setpriv --reuid=ubuntu --regid=root --init-groups --no-new-privs)
+export HOME=/home/ubuntu
+
+"${as_renovate_user[@]}" nix --version
+"${as_renovate_user[@]}" nix store ping
+
+exec "${as_renovate_user[@]}" renovate
