@@ -9,6 +9,7 @@ on:
     paths:
       - renovate-config.json
       - renovate-config.json5
+      - .github/renovate-entrypoint.sh
       - .github/workflows/renovate.yml
 
   push:
@@ -17,6 +18,7 @@ on:
     paths:
       - renovate-config.json
       - renovate-config.json5
+      - .github/renovate-entrypoint.sh
       - .github/workflows/renovate.yml
 
   workflow_dispatch:
