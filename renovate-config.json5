@@ -90,6 +90,15 @@
       schedule: "* * * * 1",
       matchPackageNames: ["ghcr.io/renovatebot/renovate"],
     },
+    {
+      // The github-actions manager extracts a tool version from the `with:`
+      // inputs of some actions, such as zizmor-action's `version`. Those
+      // inputs take a plain version, and the manager cannot write a digest
+      // into them, so a digest pin fails the branch that contains it.
+      matchManagers: ["github-actions"],
+      matchDepTypes: ["uses-with"],
+      pinDigests: false,
+    },
   ],
   platformCommit: "enabled",
   rebaseWhen: "behind-base-branch",
