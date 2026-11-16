@@ -1,7 +1,10 @@
 {
   $schema: "https://docs.renovatebot.com/renovate-schema.json",
   branchPrefix: "renovate/",
-  extends: [
+  // Renovate merges these presets before the rest of this file, so the
+  // options below override them. Presets listed in `extends` here would be
+  // merged at the repository stage, after this file, and would override it.
+  globalExtends: [
     "config:best-practices",
     "group:allNonMajor",
     "group:monorepos",
