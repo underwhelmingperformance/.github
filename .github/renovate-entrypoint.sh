@@ -36,6 +36,22 @@ chown -R ubuntu:root /nix
 as_renovate_user=(setpriv --reuid=ubuntu --regid=root --init-groups --no-new-privs)
 export HOME=/home/ubuntu
 
+# Renovate's nix manager installs containerbase's Nix for flake.lock updates.
+# Its wrapper in /usr/local/bin comes before /usr/bin/nix in PATH, so any later
+# post-upgrade task runs it, and it sets NIX_STORE_DIR and NIX_CONF_DIR to
+# directories under the containerbase cache. This configuration in its
+# NIX_CONF_DIR gives it the same store and settings as the Nix installed above.
+# NIX_STORE_DIR also applies to the substituter, which then refuses
+# cache.nixos.org as a cache for another store directory, so the substituter
+# URL sets its store directory too.
+containerbase_nix_conf_dir=/tmp/containerbase/cache/nix/conf
+"${as_renovate_user[@]}" mkdir -p "${containerbase_nix_conf_dir}"
+"${as_renovate_user[@]}" tee "${containerbase_nix_conf_dir}/nix.conf" >/dev/null <<'EOF'
+include /etc/nix/nix.conf
+store = local?store=/nix/store&state=/nix/var/nix&log=/nix/var/log/nix
+substituters = https://cache.nixos.org?store=/nix/store
+EOF
+
 "${as_renovate_user[@]}" nix --version
 "${as_renovate_user[@]}" nix store ping
 
