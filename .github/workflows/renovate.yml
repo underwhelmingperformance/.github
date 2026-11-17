@@ -90,7 +90,7 @@ jobs:
         with:
           configurationFile: renovate-config.json5
           # renovate: datasource=docker depName=ghcr.io/renovatebot/renovate
-          renovate-version: 44.241.0@sha256:7397a1b4893806ca4f25b175236932e2496bca52e9230668ac79ea0ef3868e5f
+          renovate-version: 44.251.0@sha256:64adaabe8ee3e34820c2b044b5f87e281aa278bf53e5d76df2ce800f9cc9407a
           token: ${{ steps.generate-token.outputs.token }}
           # Install a real Nix into the container before Renovate starts, so
           # post-upgrade tasks that build a flake substitute from cache.nixos.org
